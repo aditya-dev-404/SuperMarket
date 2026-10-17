@@ -1,0 +1,33 @@
+# Local development services. Start with: docker compose up -d
+services:
+  mysql:
+    image: mysql:9.7
+    container_name: supermarket-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-supermarket}
+      MYSQL_USER: ${MYSQL_USER:-supermarket}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-supermarket}
+      TZ: UTC
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Catches all outgoing emails locally (used from Phase 7). UI: http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: supermarket-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  mysql_data:
