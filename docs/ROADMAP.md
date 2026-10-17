@@ -17,4 +17,4 @@ Each phase includes backend + frontend and ends with something runnable.
 | 10 | Real payment gateway         | Replace mock (Razorpay test mode), idempotent webhooks |
 | 11 | Hardening & release          | Security review, rate limiting, caching, CI, Dockerfiles, deployment |
 
-Status: **Phase 0 delivered.**
+Status: **Phase 0 and Phase 1 delivered.** Next: Phase 2.

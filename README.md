@@ -45,6 +45,18 @@ npm run dev
 ```
 
 Verify: open http://localhost:5173 - the home page shows **Backend is UP**.
+
+### Backend settings (IntelliJ run configuration)
+
+Pass secrets through the run configuration (Modify options -> Environment variables), never in files:
+
+| Variable | Purpose |
+|----------|---------|
+| `DB_USERNAME`, `DB_PASSWORD` | MySQL login (dev defaults: `supermarket` / `supermarket`) |
+| `JWT_SECRET` | Token signing key, 32+ characters (dev has a fallback; required in prod) |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Creates the first admin on startup if missing (password 12+ characters) |
+
+Do not tick "Store as project file" for that run configuration, or the values end up in the repo.
 API docs (dev only): http://localhost:8080/swagger-ui.html
 
 ## Quality checks

@@ -20,7 +20,8 @@ Rules:
 - A module talks to another module through its service, never its repository.
 
 ## API conventions
-- Base path `/api/v1`. Groups: `/public/**`, `/customer/**`, `/vendor/**`, `/admin/**`.
+- Base path `/api/v1`. Groups: `/public/**` (open), `/auth/**` (login etc.), `/users/**` and other
+  customer endpoints (signed in), `/vendor/**` (VENDOR), `/admin/**` (ADMIN).
 - Errors use RFC 9457 `ProblemDetail` (see `GlobalExceptionHandler`).
 - List endpoints are paginated.
 
@@ -41,6 +42,10 @@ Feature-based folders under `src/features`, shared UI in `src/components`, one A
 (`src/api/axiosClient.js`), server state via TanStack Query, routes in `src/routes`.
 In development, Vite proxies `/api` to `localhost:8080`.
 
-## Security (from Phase 1)
-JWT access tokens with refresh tokens, BCrypt password hashing, role-based authorization,
-ownership checks in the service layer.
+## Security (Phase 1)
+- Short-lived JWT access token (15 min, HS256) sent as `Authorization: Bearer`, kept in frontend memory only.
+- Opaque refresh token (7 days) in an HttpOnly, SameSite=Strict cookie scoped to `/api/v1/auth`;
+  stored hashed, rotated on every use, with reuse detection (see ADR 0003).
+- BCrypt password hashing via the delegating encoder; generic login errors; timing-safe unknown-email path.
+- URL rules by role (`/admin/**`, `/vendor/**`) plus ownership checks in the service layer (from Phase 3).
+- Stateless API (no server session), CORS limited to the configured frontend origin.
