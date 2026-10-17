@@ -18,7 +18,7 @@
     <description>SuperMarket - multi-vendor e-commerce marketplace (backend)</description>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Not managed by the Spring Boot BOM. Must be a Spring Boot 4 compatible (3.x) line. -->
         <springdoc.version>3.0.0</springdoc.version>
@@ -99,8 +99,20 @@
         </dependency>
     </dependencies>
 
-    <build>
+        <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
