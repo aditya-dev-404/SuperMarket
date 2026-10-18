@@ -68,6 +68,9 @@ public class UserService {
             throw new BusinessRuleException("Current password is incorrect");
         }
         user.changePasswordHash(passwordEncoder.encode(newPassword));
+        // Write now: AuthService revokes refresh tokens right after this with a bulk query that
+        // clears the persistence context, which would silently discard an unflushed change.
+        userRepository.saveAndFlush(user);
     }
 
     private User create(String email, String rawPassword, String firstName, String lastName, Role role) {

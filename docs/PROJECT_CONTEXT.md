@@ -54,3 +54,12 @@ Frontend (`frontend/src`):
 ## Next: Phase 2 - Vendor onboarding & admin
 Customer applies to become a vendor (store profile), admin approves/rejects/suspends, role becomes VENDOR,
 dashboard shells for vendor and admin. Next Flyway migration: V3.
+
+## Phase 2: Vendor onboarding (done)
+- Table `vendors` (V3): one row per applicant user, status PENDING/APPROVED/REJECTED, unique store_name.
+- Customer: POST /api/v1/vendor-applications, GET and PUT /api/v1/vendor-applications/me.
+- Admin: GET /api/v1/admin/vendor-applications?status=, GET /{id}, POST /{id}/approve, POST /{id}/reject {reason}.
+- Approval calls User.promoteToVendor(); the frontend then refreshes the session so the new JWT carries role VENDOR.
+- Rejected applicants can edit and resubmit (status returns to PENDING).
+- Frontend: BecomeVendorPage, AdminVendorApplicationsPage, VendorDashboardPage (placeholder); API in features/vendor/vendorApi.js.
+- Next: Phase 3 vendor catalog (categories, products, variants, Cloudinary); next migration is V4.

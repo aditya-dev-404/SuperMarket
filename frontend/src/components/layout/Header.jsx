@@ -21,6 +21,9 @@ export default function Header() {
           <Link to="/">Home</Link>
           {status === 'authenticated' && (
             <>
+              {user.role === 'CUSTOMER' && <Link to="/become-vendor">Become a vendor</Link>}
+              {user.role === 'VENDOR' && <Link to="/vendor/dashboard">Vendor dashboard</Link>}
+              {user.role === 'ADMIN' && <Link to="/admin/vendor-applications">Vendor applications</Link>}
               <Link to="/account">{user.firstName}</Link>
               <button type="button" className="button button--link" onClick={handleLogout}>
                 Log out

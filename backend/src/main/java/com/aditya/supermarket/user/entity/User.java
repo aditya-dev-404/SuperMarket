@@ -59,4 +59,7 @@ public class User extends BaseEntity {
     public void changePasswordHash(String newPasswordHash) {
         this.passwordHash = newPasswordHash;
     }
+    public void promoteToVendor() {
+        this.role = Role.VENDOR;
+    }
 }

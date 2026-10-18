@@ -1,0 +1,21 @@
+CREATE TABLE vendors (
+    id                BIGINT       NOT NULL AUTO_INCREMENT,
+    user_id           BIGINT       NOT NULL,
+    store_name        VARCHAR(100) NOT NULL,
+    store_description VARCHAR(1000) NULL,
+    contact_phone     VARCHAR(20)  NOT NULL,
+    business_address  VARCHAR(500) NOT NULL,
+    gst_number        VARCHAR(15)  NULL,
+    status            VARCHAR(20)  NOT NULL,
+    rejection_reason  VARCHAR(500) NULL,
+    reviewed_by       BIGINT       NULL,
+    reviewed_at       DATETIME(6)  NULL,
+    created_at        DATETIME(6)  NOT NULL,
+    updated_at        DATETIME(6)  NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_vendors_user UNIQUE (user_id),
+    CONSTRAINT uk_vendors_store_name UNIQUE (store_name),
+    CONSTRAINT fk_vendors_user FOREIGN KEY (user_id) REFERENCES users (id),
+    CONSTRAINT fk_vendors_reviewed_by FOREIGN KEY (reviewed_by) REFERENCES users (id),
+    INDEX idx_vendors_status (status)
+);
