@@ -1,6 +1,9 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { env } from '../../config/env';
 import { useAuth } from '../../features/auth/useAuth';
+
+const navLink = ({ isActive }) =>
+  `text-sm font-medium transition hover:text-indigo-600 ${isActive ? 'text-indigo-600' : 'text-gray-600'}`;
 
 export default function Header() {
   const { user, status, logout } = useAuth();
@@ -12,28 +15,68 @@ export default function Header() {
   };
 
   return (
-    <header className="header">
-      <div className="container header__inner">
-        <Link to="/" className="header__brand">
+    <header className="border-b border-gray-200 bg-white">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+        <Link to="/" className="text-lg font-bold text-indigo-600">
           {env.appName}
         </Link>
-        <nav aria-label="Main navigation" className="header__nav">
-          <Link to="/">Home</Link>
+
+        <nav aria-label="Main navigation" className="flex flex-wrap items-center gap-5">
+          <NavLink to="/" end className={navLink}>
+            Home
+          </NavLink>
+
           {status === 'authenticated' && (
             <>
-              {user.role === 'CUSTOMER' && <Link to="/become-vendor">Become a vendor</Link>}
-              {user.role === 'VENDOR' && <Link to="/vendor/dashboard">Vendor dashboard</Link>}
-              {user.role === 'ADMIN' && <Link to="/admin/vendor-applications">Vendor applications</Link>}
-              <Link to="/account">{user.firstName}</Link>
-              <button type="button" className="button button--link" onClick={handleLogout}>
+              {user.role === 'CUSTOMER' && (
+                <NavLink to="/become-vendor" className={navLink}>
+                  Become a vendor
+                </NavLink>
+              )}
+              {user.role === 'VENDOR' && (
+                <>
+                  <NavLink to="/vendor/dashboard" className={navLink}>
+                    Vendor dashboard
+                  </NavLink>
+                  <NavLink to="/vendor/products" className={navLink}>
+                    My products
+                  </NavLink>
+                </>
+              )}
+              {user.role === 'ADMIN' && (
+                <>
+                  <NavLink to="/admin/vendor-applications" className={navLink}>
+                    Vendor applications
+                  </NavLink>
+                  <NavLink to="/admin/categories" className={navLink}>
+                    Categories
+                  </NavLink>
+                </>
+              )}
+              <NavLink to="/account" className={navLink}>
+                {user.firstName}
+              </NavLink>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="text-sm font-medium text-gray-600 hover:text-red-600"
+              >
                 Log out
               </button>
             </>
           )}
+
           {status === 'anonymous' && (
             <>
-              <Link to="/login">Log in</Link>
-              <Link to="/register">Sign up</Link>
+              <NavLink to="/login" className={navLink}>
+                Log in
+              </NavLink>
+              <Link
+                to="/register"
+                className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700"
+              >
+                Sign up
+              </Link>
             </>
           )}
         </nav>
