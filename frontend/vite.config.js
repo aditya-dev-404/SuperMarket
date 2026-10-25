@@ -9,7 +9,7 @@ export default defineConfig({
     port: 5173,
     // Forward API calls to Spring Boot during development (avoids CORS headaches).
     proxy: {
-      '/api': { target: 'http://localhost:8080', changeOrigin: true },
+      '/api': { target: 'http://localhost:8088', changeOrigin: true },
     },
   },
   test: {

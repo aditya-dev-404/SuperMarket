@@ -1,6 +1,7 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { env } from '../../config/env';
 import { useAuth } from '../../features/auth/useAuth';
+import HeaderSearch from './HeaderSearch';
 
 const navLink = ({ isActive }) =>
   `text-sm font-medium transition hover:text-indigo-600 ${isActive ? 'text-indigo-600' : 'text-gray-600'}`;
@@ -21,9 +22,15 @@ export default function Header() {
           {env.appName}
         </Link>
 
+        {/* full-width row under the logo/nav on mobile, centred between them on desktop */}
+        <HeaderSearch className="order-last w-full md:order-none md:w-auto md:max-w-sm md:flex-1" />
+
         <nav aria-label="Main navigation" className="flex flex-wrap items-center gap-5">
           <NavLink to="/" end className={navLink}>
             Home
+          </NavLink>
+          <NavLink to="/products" className={navLink}>
+            Shop
           </NavLink>
 
           {status === 'authenticated' && (

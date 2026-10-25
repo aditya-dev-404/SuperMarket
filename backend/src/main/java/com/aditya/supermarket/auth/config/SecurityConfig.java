@@ -29,36 +29,37 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableMethodSecurity
 @EnableConfigurationProperties({
-        JwtProperties.class, RefreshCookieProperties.class, AdminProperties.class, CorsProperties.class})
+    JwtProperties.class, RefreshCookieProperties.class, AdminProperties.class, CorsProperties.class})
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
-            RestAuthenticationEntryPoint authenticationEntryPoint,
-            RestAccessDeniedHandler accessDeniedHandler) throws Exception {
+                                                   RestAuthenticationEntryPoint authenticationEntryPoint,
+                                                   RestAccessDeniedHandler accessDeniedHandler) throws Exception {
         http
-                // No cookies authenticate API calls (the Bearer header does), so CSRF does not apply.
-                // The refresh cookie is SameSite=Strict and only usable on /api/v1/auth/*.
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/public/**").permitAll()
-                        .requestMatchers("/api/v1/auth/change-password").authenticated()
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/actuator/health/**", "/actuator/info").permitAll()
-                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/vendor/**").hasRole("VENDOR")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/categories").permitAll()
-                        .anyRequest().authenticated())
-                .exceptionHandling(handling -> handling
-                        .authenticationEntryPoint(authenticationEntryPoint)
-                        .accessDeniedHandler(accessDeniedHandler))
-                .oauth2ResourceServer(resourceServer -> resourceServer
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                        .authenticationEntryPoint(authenticationEntryPoint)
-                        .accessDeniedHandler(accessDeniedHandler));
+            // No cookies authenticate API calls (the Bearer header does), so CSRF does not apply.
+            // The refresh cookie is SameSite=Strict and only usable on /api/v1/auth/*.
+            .csrf(AbstractHttpConfigurer::disable)
+            .cors(Customizer.withDefaults())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/v1/public/**").permitAll()
+                .requestMatchers("/api/v1/auth/change-password").authenticated()
+                .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("/actuator/health/**", "/actuator/info").permitAll()
+                .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/vendor/**").hasRole("VENDOR")
+                // public storefront (Phase 4): browse without logging in
+                .requestMatchers(HttpMethod.GET, "/api/v1/categories", "/api/v1/products/**").permitAll()
+                .anyRequest().authenticated())
+            .exceptionHandling(handling -> handling
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler))
+            .oauth2ResourceServer(resourceServer -> resourceServer
+                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler));
         return http.build();
     }
 

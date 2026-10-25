@@ -13,6 +13,10 @@ import VendorDashboardPage from '../pages/VendorDashboardPage';
 import VendorProductFormPage from '../pages/VendorProductFormPage';
 import VendorProductsPage from '../pages/VendorProductsPage';
 import ProtectedRoute from './ProtectedRoute';
+import ProductListPage from '../pages/ProductListPage';
+import ProductDetailPage from '../pages/ProductDetailPage';
+
+
 
 export default function AppRoutes() {
   return (
@@ -23,6 +27,8 @@ export default function AppRoutes() {
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route path="forbidden" element={<ForbiddenPage />} />
+        <Route path="/products" element={<ProductListPage />} />
+        <Route path="/products/:slug" element={<ProductDetailPage />} />
 
         {/* Any logged-in user */}
         <Route element={<ProtectedRoute />}>
@@ -47,7 +53,6 @@ export default function AppRoutes() {
           <Route path="admin/vendor-applications" element={<AdminVendorApplicationsPage />} />
           <Route path="admin/categories" element={<AdminCategoriesPage />} />
         </Route>
-
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

@@ -63,3 +63,76 @@ dashboard shells for vendor and admin. Next Flyway migration: V3.
 - Rejected applicants can edit and resubmit (status returns to PENDING).
 - Frontend: BecomeVendorPage, AdminVendorApplicationsPage, VendorDashboardPage (placeholder); API in features/vendor/vendorApi.js.
 - Next: Phase 3 vendor catalog (categories, products, variants, Cloudinary); next migration is V4.
+
+
+# Phase 4: Public Storefront
+
+Anyone (no login) can search, filter, sort, paginate and open a product page.
+
+## Decisions
+- Page size **15** (default; `limit` param, max 50). Pagination is done in SQL.
+- Search: MySQL **FULLTEXT** on `products(name, description)`, boolean mode, prefix match per word.
+- Out-of-stock products are **shown greyed out** (hide them with the "In stock only" filter).
+- No vendor storefront page.
+
+## Visibility rule (every public query)
+Product `status = ACTIVE` AND category `active` AND vendor `status = APPROVED`; only `active` variants count.
+Drafts / archived / unapproved-vendor products return 404 on the detail endpoint and never appear in lists.
+
+## API (public, `GET /api/v1/products/**`)
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/v1/products` | Paginated list. Params: `q`, `category` (slug, includes sub-categories), `minPrice`, `maxPrice`, `size`, `colour`, `inStock`, `sort` (`newest` \| `price_asc` \| `price_desc` \| `relevance`), `page` (0-based), `limit` |
+| `GET /api/v1/products/filters?category=` | Sidebar data: categories (flat, with `parentSlug`), sizes, colours, min/max price |
+| `GET /api/v1/products/{slug}` | Product page: images, active variants (effective price + stock), vendor, breadcrumb |
+
+List card price = lowest effective price across variants (`priceVaries` → UI shows "From ₹X").
+Default sort: `relevance` when `q` is present, otherwise `newest`.
+
+## Files
+Backend (`com.aditya.supermarket`): `catalog/{controller/StorefrontController, service/StorefrontService, service/FullTextQuery, repository/StorefrontQueryRepository, dto/*}`, `common/dto/PagedResponse`, Flyway `V5__storefront_search_indexes.sql` (next migration: V6), test `FullTextQueryTest`.
+
+Frontend: `features/catalog/storefront/*`, `pages/ProductListPage.jsx`, `pages/ProductDetailPage.jsx`, `components/layout/HeaderSearch.jsx`.
+
+## Manual wiring (existing files, not replaced)
+1. **SecurityConfig**: permit `GET /api/v1/products/**`
+   `.requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()`
+2. **AppRoutes.jsx**: add two public routes
+   ```jsx
+   import ProductListPage from '../pages/ProductListPage';
+   import ProductDetailPage from '../pages/ProductDetailPage';
+   <Route path="/products" element={<ProductListPage />} />
+   <Route path="/products/:slug" element={<ProductDetailPage />} />
+   ```
+3. **Header.jsx**: add `<HeaderSearch className="w-full max-w-sm" />` and a "Shop" link to `/products`.
+4. **HomePage.jsx**: render `<HomeCategories />` and `<LatestProducts />`.
+5. If `axiosClient` baseURL already ends with `/api/v1`, set `API_PREFIX = ''` in `storefrontApi.js`.
+
+## Assumed schema (from V4/V3 migrations, verify once)
+All SQL is in `StorefrontQueryRepository`, so any mismatch is a one-file fix.
+- `products`: id, vendor_id, category_id, name, slug, description, base_price, status, created_at
+- `product_variants`: id, product_id, sku, size, colour, price (nullable override), stock_quantity, active
+- `product_images`: product_id, url, `position`
+- `categories`: id, name, slug, parent_id, active
+- `vendors`: id, status (`'APPROVED'`), `business_name`
+- IDs are `BIGINT` (Java `Long`). `ResourceNotFoundException` has a `(String message)` constructor.
+- Needs a `JdbcClient` bean (comes with `spring-boot-starter-jdbc` / data-jpa).
+
+## Test checklist
+- [ ] Flyway V5 applies cleanly on startup
+- [ ] `/products` shows only ACTIVE products from APPROVED vendors; DRAFT ones are missing
+- [ ] Search "shirt", then a partial word ("shir"), then characters like `+ - " (`: no errors
+- [ ] Category filter on a parent shows products of its sub-categories
+- [ ] Size / colour / price / in-stock filters combine; changing category resets them
+- [ ] 16+ products: page 2 works, URL `?page=2` reloads on the same page
+- [ ] A product with all variants at stock 0 is greyed with "Out of stock"
+- [ ] Product page: variant switch updates price/stock; unknown slug shows "Product not found"
+- [ ] Cloudinary thumbnails load small images on cards
+
+## Good practices applied
+Filtering/pagination in the DB, whitelisted sort (no raw input in SQL), sanitised search terms,
+URL as the single source of truth for filters, thumbnails via Cloudinary transformations,
+list DTO separate from detail DTO, loading skeletons and empty/error states.
+
+## Note for docs/PROJECT_CONTEXT.md
+Phase 4 (public storefront) code added; next migration is V6; next phase is Phase 5 (Cart & wishlist).
