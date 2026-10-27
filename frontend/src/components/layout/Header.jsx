@@ -1,10 +1,15 @@
+import { FiHeart } from 'react-icons/fi';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { env } from '../../config/env';
 import { useAuth } from '../../features/auth/useAuth';
+import CartNavLink from '../../features/cart/CartNavLink';
 import HeaderSearch from './HeaderSearch';
 
 const navLink = ({ isActive }) =>
   `text-sm font-medium transition hover:text-indigo-600 ${isActive ? 'text-indigo-600' : 'text-gray-600'}`;
+
+const iconLink = ({ isActive }) =>
+  `inline-flex items-center transition hover:text-indigo-600 ${isActive ? 'text-indigo-600' : 'text-gray-600'}`;
 
 export default function Header() {
   const { user, status, logout } = useAuth();
@@ -60,6 +65,10 @@ export default function Header() {
                   </NavLink>
                 </>
               )}
+              <NavLink to="/wishlist" aria-label="Wishlist" className={iconLink}>
+                <FiHeart className="h-5 w-5" aria-hidden="true" />
+              </NavLink>
+              <CartNavLink />
               <NavLink to="/account" className={navLink}>
                 {user.firstName}
               </NavLink>

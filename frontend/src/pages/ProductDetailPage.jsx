@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { FiHeart, FiShoppingCart } from 'react-icons/fi';
 import { Link, useParams } from 'react-router-dom';
+import AddToCartButton from '../features/cart/AddToCartButton';
 import Breadcrumb from '../features/catalog/storefront/Breadcrumb';
 import ImageGallery from '../features/catalog/storefront/ImageGallery';
 import { formatPrice } from '../features/catalog/storefront/priceFormat';
 import { getProductBySlug } from '../features/catalog/storefront/storefrontApi';
 import { useVariantSelection } from '../features/catalog/storefront/useVariantSelection';
 import VariantSelector from '../features/catalog/storefront/VariantSelector';
+import WishlistButton from '../features/wishlist/WishlistButton';
 
 const LOW_STOCK_THRESHOLD = 5;
 
@@ -110,25 +111,10 @@ function ProductView({ product }) {
 
           {selected?.sku && <p className="mt-4 text-xs text-gray-400">SKU: {selected.sku}</p>}
 
-          <div className="mt-6 flex gap-3">
-            {/* Wired up in Phase 5 (cart & wishlist) */}
-            <button
-              type="button"
-              disabled
-              title="Available soon"
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-md bg-gray-900 px-5 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <FiShoppingCart aria-hidden="true" /> Add to cart
-            </button>
-            <button
-              type="button"
-              disabled
-              title="Available soon"
-              aria-label="Add to wishlist"
-              className="inline-flex items-center justify-center rounded-md border border-gray-300 px-4 py-3 text-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <FiHeart aria-hidden="true" />
-            </button>
+          <div className="mt-6 flex items-start gap-3">
+            {/* key => the "added" / error message resets when another variant is chosen */}
+            <AddToCartButton key={selected?.id} variantId={selected?.id} disabled={outOfStock} />
+            <WishlistButton productId={product.id} variant="bordered" />
           </div>
 
           {product.description && (

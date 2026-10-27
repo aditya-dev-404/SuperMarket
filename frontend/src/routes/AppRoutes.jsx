@@ -3,20 +3,20 @@ import Layout from '../components/layout/Layout';
 import AdminCategoriesPage from '../pages/AdminCategoriesPage';
 import AdminVendorApplicationsPage from '../pages/AdminVendorApplicationsPage';
 import BecomeVendorPage from '../pages/BecomeVendorPage';
+import CartPage from '../pages/CartPage';
 import ForbiddenPage from '../pages/ForbiddenPage';
 import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
 import NotFoundPage from '../pages/NotFoundPage';
+import ProductDetailPage from '../pages/ProductDetailPage';
+import ProductListPage from '../pages/ProductListPage';
 import ProfilePage from '../pages/ProfilePage';
 import RegisterPage from '../pages/RegisterPage';
 import VendorDashboardPage from '../pages/VendorDashboardPage';
 import VendorProductFormPage from '../pages/VendorProductFormPage';
 import VendorProductsPage from '../pages/VendorProductsPage';
+import WishlistPage from '../pages/WishlistPage';
 import ProtectedRoute from './ProtectedRoute';
-import ProductListPage from '../pages/ProductListPage';
-import ProductDetailPage from '../pages/ProductDetailPage';
-
-
 
 export default function AppRoutes() {
   return (
@@ -33,6 +33,8 @@ export default function AppRoutes() {
         {/* Any logged-in user */}
         <Route element={<ProtectedRoute />}>
           <Route path="account" element={<ProfilePage />} />
+          <Route path="cart" element={<CartPage />} />
+          <Route path="wishlist" element={<WishlistPage />} />
         </Route>
 
         {/* CUSTOMER applies; VENDOR is allowed in so the page can redirect them after activation */}

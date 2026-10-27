@@ -136,3 +136,59 @@ list DTO separate from detail DTO, loading skeletons and empty/error states.
 
 ## Note for docs/PROJECT_CONTEXT.md
 Phase 4 (public storefront) code added; next migration is V6; next phase is Phase 5 (Cart & wishlist).
+
+# Phase 5 - Cart & Wishlist
+
+Logged-in users keep a server-side cart and a wishlist. Both are per user and need a JWT.
+
+## Decisions
+
+| Topic | Decision |
+|---|---|
+| Guests | Login required. Add to cart / wishlist sends the user to `/login` and back. |
+| Price | Always the live price (variant override, else product base price). It is locked into the order only at checkout (Phase 6). |
+| Stock | Checked on every cart change, never reserved. Final check happens at checkout. |
+| Line limit | `app.cart.max-quantity-per-line` (default 10), also capped by stock. |
+| Wishlist | Product level. "Move to cart" asks for size/colour. |
+| Own products | A vendor cannot add their own product to the cart. |
+
+## Database (Flyway `V6__cart_and_wishlist.sql`)
+
+- `carts` - one row per user (`user_id` unique).
+- `cart_items` - `(cart_id, variant_id)` unique, `quantity > 0`. Deleting a variant removes it from carts.
+- `wishlist_items` - `(user_id, product_id)` unique.
+
+## API
+
+All endpoints require authentication. Cart calls return the full updated cart.
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/api/v1/cart` | Cart grouped by vendor with totals. |
+| POST | `/api/v1/cart/items` | `{variantId, quantity}`; merges into an existing line. |
+| PATCH | `/api/v1/cart/items/{itemId}` | `{quantity}` sets the new quantity. |
+| DELETE | `/api/v1/cart/items/{itemId}` | Removes one line. |
+| DELETE | `/api/v1/cart` | Clears the cart (204). |
+| GET | `/api/v1/wishlist?page=&size=` | Paged storefront-style cards, newest first. Only ACTIVE products. |
+| GET | `/api/v1/wishlist/ids` | Product ids, for the heart icons. |
+| POST | `/api/v1/wishlist/items` | `{productId}`, idempotent (204). |
+| DELETE | `/api/v1/wishlist/items/{productId}` | Idempotent (204). |
+| POST | `/api/v1/wishlist/items/{productId}/move-to-cart` | `{variantId}`; adds 1 unit, removes from wishlist. |
+
+### Cart line status
+
+`AVAILABLE`, `INSUFFICIENT_STOCK`, `OUT_OF_STOCK`, `UNAVAILABLE` (variant/product/vendor no longer live).
+The subtotal counts only `AVAILABLE` lines; `checkoutReady` is true only when every line is `AVAILABLE`.
+
+## Frontend
+
+- `features/cart` - `cartApi.js`, `useCart.js` (query + mutations), `CartLineItem`, `AddToCartButton`, `CartNavLink`.
+- `features/wishlist` - `wishlistApi.js`, `useWishlist.js`, `WishlistButton`, `MoveToCart`.
+- `hooks/useUserScope.js` - puts the user id in query keys so cached data never leaks between accounts.
+- Pages: `CartPage` (`/cart`), `WishlistPage` (`/wishlist`). Both routes are behind `ProtectedRoute`.
+- `ProductCard` has a heart overlay; `ProductDetailPage` has the real Add to cart and heart buttons.
+
+## Out of scope (later phases)
+
+- Checkout and orders (Phase 6).
+- "Price changed since you added it" notice (needs a stored price per line).
