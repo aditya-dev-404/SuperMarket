@@ -53,6 +53,9 @@ export default function Header() {
                   <NavLink to="/vendor/products" className={navLink}>
                     My products
                   </NavLink>
+                  <NavLink to="/vendor/orders" className={navLink}>
+                    Vendor orders
+                  </NavLink>
                 </>
               )}
               {user.role === 'ADMIN' && (
@@ -65,11 +68,17 @@ export default function Header() {
                   </NavLink>
                 </>
               )}
+              <NavLink to="/orders" className={navLink}>
+                My orders
+              </NavLink>
               <NavLink to="/wishlist" aria-label="Wishlist" className={iconLink}>
                 <FiHeart className="h-5 w-5" aria-hidden="true" />
               </NavLink>
               <CartNavLink />
-              <NavLink to="/account" className={navLink}>
+              <NavLink to="/account/addresses" className={navLink}>
+                Addresses
+              </NavLink>
+              <NavLink to="/account" end className={navLink}>
                 {user.firstName}
               </NavLink>
               <button

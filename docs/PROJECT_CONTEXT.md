@@ -192,3 +192,14 @@ The subtotal counts only `AVAILABLE` lines; `checkoutReady` is true only when ev
 
 - Checkout and orders (Phase 6).
 - "Price changed since you added it" notice (needs a stored price per line).
+
+## Phase 6: Addresses, checkout & orders (done)
+
+Details: `docs/PHASE_6_ORDERS.md`; tests: `docs/PHASE_6_TEST_PLAN.md`.
+- Backend: packages `address`, `order`, `inventory`, `payment`; Flyway `V7__addresses_and_orders.sql`. **Next migration: V8.**
+- COD or mock online payment; COD adds a flat fee (`app.checkout.cod-shipping-fee`, 40), online is free; no tax.
+- One order is split into one sub-order per vendor; vendors move their sub-order one step at a time.
+- Customer can cancel before shipping; a failed mock payment cancels the order and puts the items back in the cart.
+- Frontend: `features/address`, `features/orders`, pages for checkout, orders, mock payment, addresses, vendor orders.
+- Deferred: auto-expiry of unpaid orders, admin all-orders view, MockMvc controller tests, emails (Phase 7), real gateway (Phase 10).
+- **Next: Phase 7, Email notifications.**

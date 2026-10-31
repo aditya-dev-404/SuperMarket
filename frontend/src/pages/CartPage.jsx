@@ -126,15 +126,26 @@ export default function CartPage() {
             </p>
           )}
 
-          {/* Checkout arrives with orders in the next phase */}
-          <button
-            type="button"
-            disabled
-            title="Checkout is coming soon"
-            className="mt-4 w-full rounded-md bg-gray-900 px-4 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Checkout (coming soon)
-          </button>
+          <p className="mt-3 text-xs text-gray-500">
+            Shipping is free for online payment. Cash on delivery adds a small shipping fee at checkout.
+          </p>
+
+          {cart.checkoutReady ? (
+            <Link
+              to="/checkout"
+              className="mt-4 block w-full rounded-md bg-indigo-600 px-4 py-3 text-center text-sm font-medium text-white hover:bg-indigo-700"
+            >
+              Proceed to checkout
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="mt-4 w-full cursor-not-allowed rounded-md bg-gray-900 px-4 py-3 text-sm font-medium text-white opacity-40"
+            >
+              Proceed to checkout
+            </button>
+          )}
         </aside>
       </div>
     </div>

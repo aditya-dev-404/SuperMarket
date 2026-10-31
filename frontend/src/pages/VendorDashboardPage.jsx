@@ -1,9 +1,15 @@
 import { useEffect, useState } from 'react';
-import { FiPackage, FiPlusCircle } from 'react-icons/fi';
+import { FiClipboard, FiPackage, FiPlusCircle } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { getMyApplication } from '../features/vendor/vendorApi';
 
 const actions = [
+  {
+    to: '/vendor/orders',
+    icon: FiClipboard,
+    title: 'Orders',
+    text: 'See orders for your products and update their shipping status.',
+  },
   {
     to: '/vendor/products',
     icon: FiPackage,
@@ -30,7 +36,7 @@ export default function VendorDashboardPage() {
   return (
     <section className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-2xl font-bold text-gray-900">{storeName || 'Vendor dashboard'}</h1>
-      <p className="mt-1 text-sm text-gray-500">Manage your catalog from here.</p>
+      <p className="mt-1 text-sm text-gray-500">Manage your catalog and orders from here.</p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         {actions.map(({ to, icon: Icon, title, text }) => (
