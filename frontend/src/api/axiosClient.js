@@ -15,7 +15,7 @@ export const PUBLIC_ENDPOINT = { skipAuth: true, skipRefresh: true };
 
 /**
  * Normalises backend RFC 9457 ProblemDetail errors into a plain Error with
- * `status` and `fieldErrors`, so UI code never has to inspect Axios internals.
+ * `status`, `code` and `fieldErrors`, so UI code never has to inspect Axios internals.
  */
 export function toApiError(error) {
   const problem = error.response?.data;
@@ -24,6 +24,7 @@ export function toApiError(error) {
   );
   apiError.status = error.response?.status ?? 0;
   apiError.fieldErrors = problem?.errors ?? {};
+  apiError.code = problem?.code ?? null; // e.g. EMAIL_NOT_VERIFIED
   return apiError;
 }
 

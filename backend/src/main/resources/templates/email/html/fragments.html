@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:replace="${title}">Email</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+       style="background-color:#f4f4f5;padding:24px 0;font-family:Arial,Helvetica,sans-serif;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0"
+             style="width:100%;max-width:600px;background-color:#ffffff;border-radius:8px;">
+        <tr>
+          <td th:text="${appName}"
+              style="padding:20px 32px;background-color:#111827;color:#ffffff;font-size:20px;font-weight:bold;border-radius:8px 8px 0 0;">
+            superMarket
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:32px;color:#111827;font-size:15px;line-height:1.6;">
+            <th:block th:replace="${content}">Content</th:block>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 32px;border-top:1px solid #e5e7eb;font-size:12px;color:#6b7280;">
+            This is an automated message from
+            <a th:href="${homeUrl}" th:text="${appName}" style="color:#6b7280;">superMarket</a>.
+            Please do not reply to this email.
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

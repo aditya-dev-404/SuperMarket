@@ -51,10 +51,8 @@ export default function AuthProvider({ children }) {
     [startSession],
   );
 
-  const register = useCallback(
-    async (details) => startSession(await authApi.register(details)),
-    [startSession],
-  );
+  // Registering does not log the user in: the account must be verified by email first.
+  const register = useCallback((details) => authApi.register(details), []);
 
   const endSession = useCallback(() => {
     tokenStore.clear();

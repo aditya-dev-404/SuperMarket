@@ -3,8 +3,10 @@ package com.aditya.supermarket.auth.controller;
 import com.aditya.supermarket.auth.dto.AuthResponse;
 import com.aditya.supermarket.auth.dto.ChangePasswordRequest;
 import com.aditya.supermarket.auth.dto.LoginRequest;
+import com.aditya.supermarket.auth.dto.MessageResponse;
 import com.aditya.supermarket.auth.dto.RegisterRequest;
 import com.aditya.supermarket.auth.security.RefreshCookieManager;
+import com.aditya.supermarket.auth.service.AccountService;
 import com.aditya.supermarket.auth.service.AuthResult;
 import com.aditya.supermarket.auth.service.AuthService;
 import com.aditya.supermarket.common.security.CurrentUser;
@@ -31,13 +33,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
 
+    static final String REGISTERED_MESSAGE =
+        "Account created. Check your inbox and click the link to verify your email before logging in.";
+
     private final AuthService authService;
+    private final AccountService accountService;
     private final RefreshCookieManager cookieManager;
 
-    @Operation(summary = "Register a new customer account")
+    @Operation(summary = "Register a new customer account (not logged in until the email is verified)")
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return respond(HttpStatus.CREATED, authService.register(request));
+    public ResponseEntity<MessageResponse> register(@Valid @RequestBody RegisterRequest request) {
+        accountService.register(request);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new MessageResponse(REGISTERED_MESSAGE));
     }
 
     @Operation(summary = "Log in with email and password")
@@ -50,7 +57,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refresh(HttpServletRequest request) {
         String refreshToken = cookieManager.read(request)
-                .orElseThrow(() -> new BadCredentialsException("Missing refresh token"));
+            .orElseThrow(() -> new BadCredentialsException("Missing refresh token"));
         return respond(HttpStatus.OK, authService.refresh(refreshToken));
     }
 
@@ -64,7 +71,7 @@ public class AuthController {
     @Operation(summary = "Change my password (signs out all devices)")
     @PostMapping("/change-password")
     public ResponseEntity<Void> changePassword(@AuthenticationPrincipal Jwt jwt,
-            @Valid @RequestBody ChangePasswordRequest request) {
+                                               @Valid @RequestBody ChangePasswordRequest request) {
         authService.changePassword(CurrentUser.id(jwt), request);
         return clearedCookieResponse();
     }
@@ -76,7 +83,7 @@ public class AuthController {
 
     private ResponseEntity<Void> clearedCookieResponse() {
         return ResponseEntity.noContent()
-                .header(HttpHeaders.SET_COOKIE, cookieManager.clear().toString())
-                .build();
+            .header(HttpHeaders.SET_COOKIE, cookieManager.clear().toString())
+            .build();
     }
 }

@@ -7,6 +7,7 @@ import AddressesPage from '../pages/AddressesPage';
 import CartPage from '../pages/CartPage';
 import CheckoutPage from '../pages/CheckoutPage.jsx';
 import ForbiddenPage from '../pages/ForbiddenPage';
+import ForgotPasswordPage from '../pages/ForgotPasswordPage';
 import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
 import MockPaymentPage from '../pages/MockPaymentPage';
@@ -18,11 +19,13 @@ import ProductDetailPage from '../pages/ProductDetailPage';
 import ProductListPage from '../pages/ProductListPage';
 import ProfilePage from '../pages/ProfilePage';
 import RegisterPage from '../pages/RegisterPage';
+import ResetPasswordPage from '../pages/ResetPasswordPage';
 import VendorDashboardPage from '../pages/VendorDashboardPage';
 import VendorOrderDetailPage from '../pages/VendorOrderDetailPage';
 import VendorOrdersPage from '../pages/VendorOrdersPage';
 import VendorProductFormPage from '../pages/VendorProductFormPage';
 import VendorProductsPage from '../pages/VendorProductsPage';
+import VerifyEmailPage from '../pages/VerifyEmailPage';
 import WishlistPage from '../pages/WishlistPage';
 import ProtectedRoute from './ProtectedRoute';
 
@@ -34,6 +37,9 @@ export default function AppRoutes() {
         <Route index element={<HomePage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
+        <Route path="verify-email" element={<VerifyEmailPage />} />
+        <Route path="forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="reset-password" element={<ResetPasswordPage />} />
         <Route path="forbidden" element={<ForbiddenPage />} />
         <Route path="/products" element={<ProductListPage />} />
         <Route path="/products/:slug" element={<ProductDetailPage />} />

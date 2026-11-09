@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<!--/*
+  Generic message: heading, optional greeting, paragraphs and an optional call-to-action button.
+  Model: heading (required), greeting, paragraphs (list), actionLabel + actionUrl, footnote.
+*/-->
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments :: layout(~{::title}, ~{::section})}">
+<head>
+  <title th:text="${heading}">Heading</title>
+</head>
+<body>
+<section>
+  <h1 th:text="${heading}" style="margin:0 0 16px;font-size:20px;">Heading</h1>
+  <p th:if="${greeting}" th:text="${greeting}" style="margin:0 0 12px;">Hi there,</p>
+  <p th:each="paragraph : ${paragraphs}" th:text="${paragraph}" style="margin:0 0 12px;">Paragraph</p>
+  <p th:if="${actionUrl}" style="margin:24px 0;">
+    <a th:href="${actionUrl}" th:text="${actionLabel}"
+       style="display:inline-block;padding:12px 24px;background-color:#111827;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;">Open</a>
+  </p>
+  <p th:if="${actionUrl}" style="margin:0 0 12px;font-size:13px;color:#6b7280;">
+    If the button does not work, copy this link into your browser:<br>
+    <a th:href="${actionUrl}" th:text="${actionUrl}" style="color:#6b7280;word-break:break-all;">link</a>
+  </p>
+  <p th:if="${footnote}" th:text="${footnote}" style="margin:16px 0 0;font-size:13px;color:#6b7280;">Footnote</p>
+</section>
+</body>
+</html>

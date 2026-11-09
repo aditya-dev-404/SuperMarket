@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -42,6 +43,13 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private boolean enabled = true;
 
+    /** New accounts start unverified; only a verified account can log in. */
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = false;
+
+    @Column(name = "email_verified_at")
+    private Instant emailVerifiedAt;
+
     public User(String email, String passwordHash, String firstName, String lastName, Role role) {
         this.email = email;
         this.passwordHash = passwordHash;
@@ -59,7 +67,16 @@ public class User extends BaseEntity {
     public void changePasswordHash(String newPasswordHash) {
         this.passwordHash = newPasswordHash;
     }
+
     public void promoteToVendor() {
         this.role = Role.VENDOR;
+    }
+
+    /** Marks the address as confirmed. Safe to call twice: the first confirmation time is kept. */
+    public void markEmailVerified(Instant now) {
+        if (!emailVerified) {
+            emailVerified = true;
+            emailVerifiedAt = now;
+        }
     }
 }

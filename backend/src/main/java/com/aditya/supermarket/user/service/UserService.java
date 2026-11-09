@@ -7,6 +7,7 @@ import com.aditya.supermarket.user.dto.UpdateProfileRequest;
 import com.aditya.supermarket.user.entity.Role;
 import com.aditya.supermarket.user.entity.User;
 import com.aditya.supermarket.user.repository.UserRepository;
+import java.time.Instant;
 import java.util.Locale;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,9 @@ public class UserService {
         if (userRepository.existsByEmail(normalize(email))) {
             return false;
         }
-        create(email, rawPassword, "Platform", "Admin", Role.ADMIN);
+        User admin = create(email, rawPassword, "Platform", "Admin", Role.ADMIN);
+        // The admin is configured by the operator, so there is no mailbox to confirm.
+        admin.markEmailVerified(Instant.now());
         return true;
     }
 
@@ -73,17 +76,43 @@ public class UserService {
         userRepository.saveAndFlush(user);
     }
 
+    @Transactional
+    public User markEmailVerified(Long id, Instant now) {
+        User user = getById(id);
+        user.markEmailVerified(now);
+        return user;
+    }
+
+    /**
+     * Sets a new password from a password-reset link. The link was delivered to the account's own
+     * mailbox, so using it also proves the address belongs to the user and verifies it.
+     */
+    @Transactional
+    public User resetPassword(Long id, String newPassword, Instant now) {
+        User user = getById(id);
+        user.changePasswordHash(passwordEncoder.encode(newPassword));
+        user.markEmailVerified(now);
+        // Write now: the caller revokes refresh tokens next with a bulk query that clears the context.
+        return userRepository.saveAndFlush(user);
+    }
+
+    /** Housekeeping: removes unverified customer accounts created before the cutoff. */
+    @Transactional
+    public int deleteUnverifiedCreatedBefore(Instant cutoff) {
+        return userRepository.deleteUnverifiedCreatedBefore(cutoff);
+    }
+
     private User create(String email, String rawPassword, String firstName, String lastName, Role role) {
         String normalizedEmail = normalize(email);
         if (userRepository.existsByEmail(normalizedEmail)) {
             throw new DuplicateResourceException(DUPLICATE_EMAIL_MESSAGE);
         }
         User user = new User(
-                normalizedEmail,
-                passwordEncoder.encode(rawPassword),
-                firstName.trim(),
-                lastName.trim(),
-                role);
+            normalizedEmail,
+            passwordEncoder.encode(rawPassword),
+            firstName.trim(),
+            lastName.trim(),
+            role);
         try {
             return userRepository.saveAndFlush(user);
         } catch (DataIntegrityViolationException ex) {

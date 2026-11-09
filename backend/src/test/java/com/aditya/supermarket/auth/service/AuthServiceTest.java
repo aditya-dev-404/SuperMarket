@@ -21,6 +21,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -33,17 +34,19 @@ class AuthServiceTest {
     private JwtService jwtService;
     @Mock
     private RefreshTokenService refreshTokenService;
-
+    @Mock
+    private ApplicationEventPublisher events;
     private AuthService authService;
 
     @BeforeEach
     void setUp() {
-        authService = new AuthService(userService, jwtService, refreshTokenService, passwordEncoder);
+        authService = new AuthService(userService, jwtService, refreshTokenService, passwordEncoder, events);
     }
 
     private User customer() {
         User user = new User("jane@example.com", passwordEncoder.encode("Passw0rd1"), "Jane", "Doe", Role.CUSTOMER);
         ReflectionTestUtils.setField(user, "id", 5L);
+        user.markEmailVerified(Instant.now());
         return user;
     }
 

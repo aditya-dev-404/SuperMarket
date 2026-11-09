@@ -44,6 +44,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problem(HttpStatus.UNPROCESSABLE_ENTITY, "Business rule violated", ex.getMessage());
     }
 
+    /** 403 with a machine-readable code so the login page can offer "resend verification email". */
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ProblemDetail handleEmailNotVerified(EmailNotVerifiedException ex) {
+        ProblemDetail pd = problem(HttpStatus.FORBIDDEN, "Email not verified", ex.getMessage());
+        pd.setProperty("code", EmailNotVerifiedException.CODE);
+        return pd;
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ProblemDetail handleAuthentication(AuthenticationException ex) {
         return problem(HttpStatus.UNAUTHORIZED, "Authentication failed", ex.getMessage());
@@ -59,9 +67,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ProblemDetail handleConstraintViolation(ConstraintViolationException ex) {
         Map<String, String> errors = new LinkedHashMap<>();
         ex.getConstraintViolations().forEach(v ->
-                errors.put(v.getPropertyPath().toString(), v.getMessage()));
+            errors.put(v.getPropertyPath().toString(), v.getMessage()));
         ProblemDetail pd = problem(HttpStatus.BAD_REQUEST, "Validation failed",
-                "One or more parameters are invalid");
+            "One or more parameters are invalid");
         pd.setProperty("errors", errors);
         return pd;
     }
@@ -71,17 +79,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ProblemDetail handleUnexpected(Exception ex) {
         log.error("Unhandled exception", ex);
         return problem(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error",
-                "An unexpected error occurred. Please try again later.");
+            "An unexpected error occurred. Please try again later.");
     }
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+                                                                  HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         Map<String, String> errors = new LinkedHashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(fe ->
-                errors.putIfAbsent(fe.getField(), fe.getDefaultMessage()));
+            errors.putIfAbsent(fe.getField(), fe.getDefaultMessage()));
         ProblemDetail pd = problem(HttpStatus.BAD_REQUEST, "Validation failed",
-                "Request body contains invalid fields");
+            "Request body contains invalid fields");
         pd.setProperty("errors", errors);
         return ResponseEntity.badRequest().body(pd);
     }
