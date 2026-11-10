@@ -31,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -46,12 +47,13 @@ class OrderServiceTest {
     private OrderRepository orderRepository;
     @Mock
     private OrderInventory orderInventory;
-
+    @Mock
+    private ApplicationEventPublisher events;
     private OrderService orderService;
 
     @BeforeEach
     void setUp() {
-        orderService = new OrderService(orderRepository, orderInventory, Clock.fixed(NOW, ZoneOffset.UTC));
+        orderService = new OrderService(orderRepository, orderInventory, Clock.fixed(NOW, ZoneOffset.UTC), events);
     }
 
     private void givenLockedOrder(Order order) {

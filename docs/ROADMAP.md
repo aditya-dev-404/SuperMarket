@@ -18,3 +18,6 @@ Each phase includes backend + frontend and ends with something runnable.
 | 11 | Hardening & release          | Security review, rate limiting, caching, CI, Dockerfiles, deployment |
 
 Status: **Phase 0 and Phase 1 delivered.** Next: Phase 2.
+
+## docs/ROADMAP.md
+Mark Phase 7 as done.

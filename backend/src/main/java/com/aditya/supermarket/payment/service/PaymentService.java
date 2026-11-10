@@ -2,6 +2,8 @@ package com.aditya.supermarket.payment.service;
 
 import com.aditya.supermarket.common.exception.BusinessRuleException;
 import com.aditya.supermarket.common.exception.ResourceNotFoundException;
+import com.aditya.supermarket.notification.event.OrderPaymentFailedEvent;
+import com.aditya.supermarket.notification.event.OrderPlacedEvent;
 import com.aditya.supermarket.order.dto.OrderResponse;
 import com.aditya.supermarket.order.entity.Order;
 import com.aditya.supermarket.order.repository.OrderRepository;
@@ -13,6 +15,7 @@ import com.aditya.supermarket.payment.gateway.PaymentResult;
 import com.aditya.supermarket.payment.repository.PaymentRepository;
 import java.time.Clock;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +32,7 @@ public class PaymentService {
     private final PaymentGateway paymentGateway;
     private final OrderInventory orderInventory;
     private final Clock clock;
+    private final ApplicationEventPublisher events;
 
     @Transactional
     public OrderResponse pay(Long userId, Long orderId, PayOrderRequest request) {
@@ -43,10 +47,12 @@ public class PaymentService {
         if (result.successful()) {
             paymentRepository.save(Payment.succeeded(order, provider, order.getTotal(), result.reference()));
             order.markPaid();
+            events.publishEvent(new OrderPlacedEvent(order.getId()));
         } else {
             paymentRepository.save(Payment.failed(order, provider, order.getTotal(), result.reference()));
             order.markPaymentFailed(clock.instant());
             orderInventory.restore(order);
+            events.publishEvent(new OrderPaymentFailedEvent(order.getId()));
         }
         return OrderResponse.from(order);
     }

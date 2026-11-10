@@ -8,6 +8,7 @@ import com.aditya.supermarket.user.entity.Role;
 import com.aditya.supermarket.user.entity.User;
 import com.aditya.supermarket.user.repository.UserRepository;
 import java.time.Instant;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,11 @@ public class UserService {
 
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(normalize(email));
+    }
+
+    /** Account emails of every active admin; used for admin alerts. */
+    public List<String> findAdminEmails() {
+        return userRepository.findDeliverableEmailsByRole(Role.ADMIN);
     }
 
     public Optional<User> findById(Long id) {

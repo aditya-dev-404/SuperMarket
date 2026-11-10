@@ -12,6 +12,7 @@ import com.aditya.supermarket.catalog.entity.ProductVariant;
 import com.aditya.supermarket.catalog.repository.ProductImageRepository;
 import com.aditya.supermarket.catalog.repository.ProductImageRepository.MainImage;
 import com.aditya.supermarket.common.exception.BusinessRuleException;
+import com.aditya.supermarket.notification.event.OrderPlacedEvent;
 import com.aditya.supermarket.order.config.CheckoutProperties;
 import com.aditya.supermarket.order.dto.OrderResponse;
 import com.aditya.supermarket.order.dto.PlaceOrderRequest;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +51,7 @@ public class CheckoutService {
     private final OrderRepository orderRepository;
     private final OrderNumberGenerator orderNumberGenerator;
     private final CheckoutProperties checkoutProperties;
+    private final ApplicationEventPublisher events;
 
     @Transactional
     public OrderResponse placeOrder(Long userId, PlaceOrderRequest request) {
@@ -68,6 +71,10 @@ public class CheckoutService {
         orderInventory.deduct(order);
         orderRepository.save(order);
         cartService.clear(userId);
+        if (request.paymentMethod() == PaymentMethod.COD) {
+            // A cash-on-delivery order is final right now; an online order is announced once it is paid.
+            events.publishEvent(new OrderPlacedEvent(order.getId()));
+        }
         return OrderResponse.from(order);
     }
 

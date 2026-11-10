@@ -42,6 +42,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
@@ -62,7 +63,8 @@ class VendorOrderServiceTest {
     private SubOrderRepository subOrderRepository;
     @Mock
     private OrderRepository orderRepository;
-
+    @Mock
+    private ApplicationEventPublisher events;
     private VendorOrderService service;
 
     @BeforeEach
@@ -70,7 +72,7 @@ class VendorOrderServiceTest {
         Vendor vendor = approvedVendor(VENDOR_ID, user(99));
         when(vendorContext.requireApprovedVendor()).thenReturn(vendor);
         service = new VendorOrderService(
-            vendorContext, subOrderRepository, orderRepository, Clock.fixed(NOW, ZoneOffset.UTC));
+            vendorContext, subOrderRepository, orderRepository, Clock.fixed(NOW, ZoneOffset.UTC), events);
     }
 
     /** A cash-on-delivery order with one sub-order (id 70) that belongs to the logged-in vendor. */

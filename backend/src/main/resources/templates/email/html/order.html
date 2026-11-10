@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!--/*
+  Order message: heading, greeting, paragraphs, optional item table, optional totals, optional address block
+  and an optional call-to-action button.
+  Model: heading, greeting, paragraphs (list), items (list of maps: name, variant, quantity, unitPrice, lineTotal),
+  summary (list of maps: label, value), addressTitle + addressLines (list), actionLabel + actionUrl, footnote.
+*/-->
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments :: layout(~{::title}, ~{::section})}">
+<head>
+  <title th:text="${heading}">Heading</title>
+</head>
+<body>
+<section>
+  <h1 th:text="${heading}" style="margin:0 0 16px;font-size:20px;">Heading</h1>
+  <p th:if="${greeting}" th:text="${greeting}" style="margin:0 0 12px;">Hi there,</p>
+  <p th:each="paragraph : ${paragraphs}" th:text="${paragraph}" style="margin:0 0 12px;">Paragraph</p>
+
+  <table th:if="${items}" role="presentation" width="100%" cellpadding="0" cellspacing="0"
+         style="margin:20px 0 8px;border-top:1px solid #e5e7eb;">
+    <tr th:each="item : ${items}">
+      <td style="padding:10px 0;border-bottom:1px solid #e5e7eb;">
+        <span th:text="${item['name']}" style="font-weight:bold;">Product</span>
+        <span th:if="${item['variant']}" th:text="${item['variant']}"
+              style="display:block;font-size:13px;color:#6b7280;">M, Black</span>
+        <span style="display:block;font-size:13px;color:#6b7280;">
+                    <span th:text="${item['quantity']}">1</span> &times; <span th:text="${item['unitPrice']}">&#8377;0</span>
+                </span>
+      </td>
+      <td align="right" valign="top" th:text="${item['lineTotal']}"
+          style="padding:10px 0;border-bottom:1px solid #e5e7eb;white-space:nowrap;">&#8377;0</td>
+    </tr>
+  </table>
+
+  <table th:if="${summary}" role="presentation" width="100%" cellpadding="0" cellspacing="0"
+         style="margin:0 0 16px;">
+    <tr th:each="row : ${summary}">
+      <td th:text="${row['label']}" style="padding:4px 0;color:#6b7280;">Total</td>
+      <td th:text="${row['value']}" align="right" style="padding:4px 0;white-space:nowrap;">&#8377;0</td>
+    </tr>
+  </table>
+
+  <div th:if="${addressLines}" style="margin:16px 0;padding:12px 16px;background-color:#f9fafb;border-radius:6px;">
+    <p th:text="${addressTitle}" style="margin:0 0 4px;font-weight:bold;">Delivering to</p>
+    <p th:each="line : ${addressLines}" th:text="${line}" style="margin:0;font-size:14px;">Address line</p>
+  </div>
+
+  <p th:if="${actionUrl}" style="margin:24px 0;">
+    <a th:href="${actionUrl}" th:text="${actionLabel}"
+       style="display:inline-block;padding:12px 24px;background-color:#111827;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;">Open</a>
+  </p>
+  <p th:if="${actionUrl}" style="margin:0 0 12px;font-size:13px;color:#6b7280;">
+    If the button does not work, copy this link into your browser:<br>
+    <a th:href="${actionUrl}" th:text="${actionUrl}" style="color:#6b7280;word-break:break-all;">link</a>
+  </p>
+  <p th:if="${footnote}" th:text="${footnote}" style="margin:16px 0 0;font-size:13px;color:#6b7280;">Footnote</p>
+</section>
+</body>
+</html>

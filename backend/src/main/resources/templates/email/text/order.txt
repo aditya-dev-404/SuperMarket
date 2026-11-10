@@ -1,0 +1,22 @@
+[(${heading})]
+[# th:if="${greeting}"]
+
+[(${greeting})][/][# th:each="paragraph : ${paragraphs}"]
+
+[(${paragraph})][/][# th:if="${items}"]
+
+Items:[# th:each="item : ${items}"]
+- [(${item['quantity']})] x [(${item['name']})][# th:if="${item['variant']}"] ([(${item['variant']})])[/] @ [(${item['unitPrice']})] = [(${item['lineTotal']})][/][/][# th:if="${summary}"]
+[# th:each="row : ${summary}"]
+[(${row['label']})]: [(${row['value']})][/][/][# th:if="${addressLines}"]
+
+[(${addressTitle})]:[# th:each="line : ${addressLines}"]
+[(${line})][/][/][# th:if="${actionUrl}"]
+
+[(${actionLabel})]: [(${actionUrl})][/][# th:if="${footnote}"]
+
+[(${footnote})][/]
+
+--
+[(${appName})]
+This is an automated message. Please do not reply to this email.

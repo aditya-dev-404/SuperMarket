@@ -203,3 +203,27 @@ Details: `docs/PHASE_6_ORDERS.md`; tests: `docs/PHASE_6_TEST_PLAN.md`.
 - Frontend: `features/address`, `features/orders`, pages for checkout, orders, mock payment, addresses, vendor orders.
 - Deferred: auto-expiry of unpaid orders, admin all-orders view, MockMvc controller tests, emails (Phase 7), real gateway (Phase 10).
 - **Next: Phase 7, Email notifications.**
+# Phase 7 – 
+
+## docs/PROJECT_CONTEXT.md (append under the phase status / code reference)
+
+```
+### Phase 7 – Email notifications (done)
+- Package com.aditya.supermarket.notification: config (NotificationProperties, NotificationConfig), entity
+  (NotificationLog, NotificationType, NotificationStatus), repository, dto/NotificationRequest, sender
+  (EmailSender, SmtpEmailSender), service (NotificationService, NotificationLogService, EmailTemplateRenderer,
+  OrderEmailDataLoader, OrderEmailData), event/*, listener/{AccountEmailListener, VendorEmailListener,
+  OrderEmailListener}, job/NotificationRetryJob.
+- Pattern: services publish events; listeners run after commit, async; NotificationService.send never throws and
+  writes notification_log; a scheduled job retries failures (max 3 attempts).
+- Templates: resources/templates/email/{html,text}/{generic,order}.*
+- Auth additions: email verification (account_tokens, hashed single-use tokens), forgot / reset password,
+  AccountService, AccountController, UnverifiedAccountCleanupJob; User.emailVerified; login returns 403
+  EMAIL_NOT_VERIFIED for unverified accounts.
+- Migrations: V8 notification_log, V9 email verification + account_tokens. Next migration: V10.
+- Config: spring.mail.* and app.notification.* / app.account.* (see docs/PHASE_7_NOTIFICATIONS.md).
+  Dev uses Mailpit (SMTP 1025, UI http://localhost:8025); a real SMTP provider is configured in Phase 11.
+- Frontend: pages VerifyEmail, ForgotPassword, ResetPassword; Login and Register rewritten in Tailwind;
+  components PasswordField, AuthCard, ActionButton; routes /verify-email, /forgot-password, /reset-password.
+```
+

@@ -2,6 +2,7 @@ package com.aditya.supermarket.order.service;
 
 import com.aditya.supermarket.common.dto.PagedResponse;
 import com.aditya.supermarket.common.exception.ResourceNotFoundException;
+import com.aditya.supermarket.notification.event.SubOrderStatusChangedEvent;
 import com.aditya.supermarket.order.dto.UpdateSubOrderStatusRequest;
 import com.aditya.supermarket.order.dto.VendorSubOrderResponse;
 import com.aditya.supermarket.order.dto.VendorSubOrderSummaryResponse;
@@ -15,6 +16,7 @@ import com.aditya.supermarket.vendor.service.VendorContext;
 import java.time.Clock;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +42,7 @@ public class VendorOrderService {
     private final SubOrderRepository subOrderRepository;
     private final OrderRepository orderRepository;
     private final Clock clock;
+    private final ApplicationEventPublisher events;
 
     /** @param status optional filter; null shows every visible status, newest first */
     @Transactional(readOnly = true)
@@ -82,6 +85,10 @@ public class VendorOrderService {
             .orElseThrow(VendorOrderService::notFound);
 
         subOrder.advanceTo(request.status(), clock.instant());
+        if (request.status() == SubOrderStatus.SHIPPED || request.status() == SubOrderStatus.DELIVERED) {
+            // Only the steps a customer cares about; PROCESSING stays silent.
+            events.publishEvent(new SubOrderStatusChangedEvent(order.getId(), subOrder.getId(), request.status()));
+        }
         return VendorSubOrderResponse.from(subOrder);
     }
 

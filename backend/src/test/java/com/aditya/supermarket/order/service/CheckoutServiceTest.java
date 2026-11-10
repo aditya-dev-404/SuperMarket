@@ -42,6 +42,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 class CheckoutServiceTest {
@@ -64,6 +65,8 @@ class CheckoutServiceTest {
     private OrderRepository orderRepository;
     @Mock
     private OrderNumberGenerator orderNumberGenerator;
+    @Mock
+    private ApplicationEventPublisher events;
 
     private CheckoutService checkoutService;
     private Cart cart;
@@ -74,7 +77,7 @@ class CheckoutServiceTest {
     void setUp() {
         checkoutService = new CheckoutService(cartItemRepository, cartService, addressService,
             productImageRepository, orderInventory, orderRepository, orderNumberGenerator,
-            new CheckoutProperties(COD_FEE));
+            new CheckoutProperties(COD_FEE), events);
         cart = new Cart(USER_ID);
         vendorA = approvedVendor(30, user(99));
         vendorB = approvedVendor(31, user(98));

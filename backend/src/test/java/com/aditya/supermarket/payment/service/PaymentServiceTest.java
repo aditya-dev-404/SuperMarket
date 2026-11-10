@@ -33,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
@@ -49,13 +50,14 @@ class PaymentServiceTest {
     private PaymentGateway paymentGateway;
     @Mock
     private OrderInventory orderInventory;
-
+    @Mock
+    private ApplicationEventPublisher events;
     private PaymentService paymentService;
 
     @BeforeEach
     void setUp() {
         paymentService = new PaymentService(
-            orderRepository, paymentRepository, paymentGateway, orderInventory, Clock.fixed(NOW, ZoneOffset.UTC));
+            orderRepository, paymentRepository, paymentGateway, orderInventory, Clock.fixed(NOW, ZoneOffset.UTC), events);
     }
 
     private void givenLockedOrder(Order order) {

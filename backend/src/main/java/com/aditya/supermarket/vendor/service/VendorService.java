@@ -3,6 +3,9 @@ package com.aditya.supermarket.vendor.service;
 import com.aditya.supermarket.common.exception.BusinessRuleException;
 import com.aditya.supermarket.common.exception.DuplicateResourceException;
 import com.aditya.supermarket.common.exception.ResourceNotFoundException;
+import com.aditya.supermarket.notification.event.VendorApplicationApprovedEvent;
+import com.aditya.supermarket.notification.event.VendorApplicationRejectedEvent;
+import com.aditya.supermarket.notification.event.VendorApplicationSubmittedEvent;
 import com.aditya.supermarket.user.entity.Role;
 import com.aditya.supermarket.user.entity.User;
 import com.aditya.supermarket.user.service.UserService;
@@ -12,6 +15,7 @@ import com.aditya.supermarket.vendor.entity.Vendor;
 import com.aditya.supermarket.vendor.entity.VendorStatus;
 import com.aditya.supermarket.vendor.repository.VendorRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -25,6 +29,7 @@ public class VendorService {
 
     private final VendorRepository vendorRepository;
     private final UserService userService;
+    private final ApplicationEventPublisher events;
 
     // ---------- applicant ----------
 
@@ -45,6 +50,7 @@ public class VendorService {
             request.contactPhone(),
             request.businessAddress(),
             request.gstNumber()));
+        events.publishEvent(submittedEvent(vendor, false));
         return VendorApplicationResponse.from(vendor);
     }
 
@@ -60,12 +66,17 @@ public class VendorService {
             throw new BusinessRuleException("An approved application can no longer be edited");
         }
         ensureStoreNameAvailable(request.storeName(), vendor.getId());
+        boolean resubmission = vendor.getStatus() == VendorStatus.REJECTED;
         vendor.updateDetails(
             request.storeName(),
             request.storeDescription(),
             request.contactPhone(),
             request.businessAddress(),
             request.gstNumber());
+        if (resubmission) {
+            // Only a rejected application going back to review is news; plain edits of a pending one are not.
+            events.publishEvent(submittedEvent(vendor, true));
+        }
         return VendorApplicationResponse.from(vendor);
     }
 
@@ -90,6 +101,9 @@ public class VendorService {
         ensurePending(vendor);
         vendor.approve(userService.getById(adminId));
         vendor.getUser().promoteToVendor();
+        User applicant = vendor.getUser();
+        events.publishEvent(new VendorApplicationApprovedEvent(
+            vendor.getId(), applicant.getId(), applicant.getEmail(), applicant.getFirstName(), vendor.getStoreName()));
         return VendorApplicationResponse.from(vendor);
     }
 
@@ -98,10 +112,22 @@ public class VendorService {
         Vendor vendor = findById(id);
         ensurePending(vendor);
         vendor.reject(userService.getById(adminId), reason);
+        User applicant = vendor.getUser();
+        events.publishEvent(new VendorApplicationRejectedEvent(
+            vendor.getId(), applicant.getId(), applicant.getEmail(), applicant.getFirstName(),
+            vendor.getStoreName(), vendor.getRejectionReason()));
         return VendorApplicationResponse.from(vendor);
     }
 
     // ---------- helpers ----------
+
+    private static VendorApplicationSubmittedEvent submittedEvent(Vendor vendor, boolean resubmission) {
+        User applicant = vendor.getUser();
+        return new VendorApplicationSubmittedEvent(
+            vendor.getId(), applicant.getId(), applicant.getEmail(), applicant.getFirstName(),
+            applicant.getFirstName() + " " + applicant.getLastName(),
+            vendor.getStoreName(), vendor.getContactPhone(), vendor.getGstNumber(), resubmission);
+    }
 
     private Vendor findById(Long id) {
         return vendorRepository.findById(id)

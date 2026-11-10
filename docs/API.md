@@ -49,3 +49,23 @@ All endpoints need a login. `/api/v1/vendor/**` needs the VENDOR role.
 | GET | `/api/v1/vendor/sub-orders?status=&page=&size=` | The vendor's own sub-orders (never unpaid online ones). |
 | GET | `/api/v1/vendor/sub-orders/{id}` | Items and the delivery address; `nextStatus` is null when finished. |
 | PATCH | `/api/v1/vendor/sub-orders/{id}/status` | `{status}`. Exactly one step forward (PLACED, PROCESSING, SHIPPED, DELIVERED). Anything else is 422. |
+
+
+## docs/API.md (append) Phase 7
+
+```
+## Account emails and verification (public, /api/v1/auth)
+POST /api/v1/auth/register              202 {message}         creates an UNVERIFIED account, emails a link
+POST /api/v1/auth/verify-email          204  {token}          verifies the email, sends the welcome email
+POST /api/v1/auth/resend-verification   202 {message}  {email}   same answer for any email
+POST /api/v1/auth/forgot-password       202 {message}  {email}   same answer for any email
+POST /api/v1/auth/reset-password        204  {token, newPassword}  also verifies the email, signs out all devices
+POST /api/v1/auth/login                 403 {code: "EMAIL_NOT_VERIFIED"} when the password is right but the email is not verified
+POST /api/v1/auth/change-password       (unchanged) now also emails "password changed"
+```
+
+Errors for invalid, expired or used links: 422 "This link is invalid or has expired. Please request a new one."
+
+No other endpoint changed in Phase 7. Vendor and order emails are side effects of the existing endpoints:
+`POST /vendor-applications`, `PUT /vendor-applications/me`, `POST /admin/vendor-applications/{id}/approve|reject`,
+`POST /orders`, `POST /orders/{id}/pay`, `POST /orders/{id}/cancel`, `PATCH /vendor/sub-orders/{id}/status`.
