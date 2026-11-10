@@ -1,0 +1,14 @@
+[(${heading})]
+[# th:if="${greeting}"]
+
+[(${greeting})][/][# th:each="paragraph : ${paragraphs}"]
+
+[(${paragraph})][/][# th:if="${actionUrl}"]
+
+[(${actionLabel})]: [(${actionUrl})][/][# th:if="${footnote}"]
+
+[(${footnote})][/]
+
+--
+[(${appName})]
+This is an automated message. Please do not reply to this email.
